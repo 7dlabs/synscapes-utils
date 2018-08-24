@@ -5,6 +5,8 @@ import math
 import os
 import sys
 
+import matplotlib.pyplot as plt
+
 import helpers
 
 # Arguments ---
@@ -59,7 +61,9 @@ parser.add_argument('--analyze-num', '-a', type=int,
 parser.add_argument('--display-num', '-d', type=int,
                     help='Maximum number of images to display')
 parser.add_argument('--sort', '-s', choices=scene_metadata,
-                    help='Sort by the ')
+                    help='Sort by the specified metadata key.')
+parser.add_argument('--plot', '-p', action='store_true',
+                    help='Plots the values used to sort (requires --sort).')
 
 args = parser.parse_args()
 
@@ -104,5 +108,25 @@ if args.display_num:
 # Display
 rgb_path = os.path.join(img_dir, 'rgb')
 images = [os.path.join(rgb_path, '{}.png'.format(idx)) for idx in indices]
-cmd = 'feh {}'.format(' '.join(images))
+cmd = 'feh {} &'.format(' '.join(images))
 os.system(cmd)
+
+# Plot
+if args.sort and args.plot:
+    y_values = helpers.metadata_values(meta_dir, indices, args.sort)
+    # Style
+    ax = plt.subplot(111)    
+    ax.spines["top"].set_visible(False)    
+    ax.spines["bottom"].set_visible(False)    
+    ax.spines["right"].set_visible(False)    
+    ax.spines["left"].set_visible(False)
+    ax.get_xaxis().tick_bottom()    
+    ax.get_yaxis().tick_left()    
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
+    plt.tick_params(axis="both", which="both", bottom="off", top="off",    
+                labelbottom="on", left="off", right="off", labelleft="on")
+    # Plot
+    plt.plot(y_values, linewidth=3.0, color=helpers.tableau20[0])
+    plt.title(args.sort)
+    plt.show()
