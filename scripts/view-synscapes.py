@@ -42,7 +42,6 @@ scene_metadata = [
     "parking_angle",
     "parking_presence",
     "rel_dist_to_isect",
-    "road_material_type",
     "sidewalk_width",
     "sky_contrast",
     "sun_height",
@@ -67,11 +66,6 @@ parser.add_argument('--plot', '-p', action='store_true',
 
 args = parser.parse_args()
 
-# Functions ---
-
-def stride(num, desired):
-    return max(1, int(math.ceil(num / desired)))
-
 # Script ---
 
 root = os.path.abspath(args.path)
@@ -94,7 +88,7 @@ indices = sorted([int(f.split('.')[0]) for f in os.listdir(meta_dir)])
 
 # Restrict number to analyze
 if args.analyze_num:
-    indices = indices[::stride(len(indices), args.analyze_num)]
+    indices = indices[::helpers.stride(len(indices), args.analyze_num)]
 
 # Sort
 if args.sort:
@@ -103,7 +97,7 @@ if args.sort:
 
 # Restrict number to display
 if args.display_num:
-    indices = indices[::stride(len(indices), args.display_num)]
+    indices = indices[::helpers.stride(len(indices), args.display_num)]
     
 # Display
 rgb_path = os.path.join(img_dir, 'rgb')
@@ -121,12 +115,13 @@ if args.sort and args.plot:
     ax.spines["right"].set_visible(False)    
     ax.spines["left"].set_visible(False)
     ax.get_xaxis().tick_bottom()    
-    ax.get_yaxis().tick_left()    
-    plt.xticks(fontsize=14)
-    plt.yticks(fontsize=14)
-    plt.tick_params(axis="both", which="both", bottom="off", top="off",    
-                labelbottom="on", left="off", right="off", labelleft="on")
+    ax.get_yaxis().tick_left()
+    #plt.xticks(fontsize=14)
+    #plt.yticks(fontsize=14)
+    #plt.tick_params(axis="both", which="both", bottom="off", top="off",    
+    #            labelbottom="on", left="off", right="off", labelleft="on")
     # Plot
+    plt.style.use('seaborn-muted')
     plt.plot(y_values, linewidth=3.0, color=helpers.tableau20[0])
     plt.title(args.sort)
     plt.show()
