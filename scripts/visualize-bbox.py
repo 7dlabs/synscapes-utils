@@ -124,6 +124,19 @@ def draw_3d():
 
 root = os.path.abspath(args.path)
 
+# Ensure root exists
+if not os.path.exists(root):
+    print('Invalid path:', root)
+    sys.exit(1)
+
+img_dir, meta_dir = [os.path.join(root, x) for x in ['img', 'meta']]
+
+# Ensure integrity
+for d in [img_dir, meta_dir]:
+    if not os.path.exists(d):
+        print('Missing directory:', d)
+        sys.exit(1)
+
 img_path = os.path.join(root, 'img', 'rgb', '{}.png'.format(args.index))
 meta_path = os.path.join(root, 'meta')
 
