@@ -6,6 +6,8 @@ import os
 import sys
 
 import numpy as np
+
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
@@ -20,12 +22,15 @@ parser.add_argument('path',
                     help='Path to SynScapes root directory.')
 parser.add_argument('--index', '-i', type=int, required=True,
                     help='Index of image to visualize')
-parser.add_argument('--type', choices=['2d', '3d'], default='2d',
-                    help='Whether to visualize 2d or 3d bounding boxes')
+parser.add_argument('--type', choices=['2d', '3d', 'class', 'instance'],
+                    default='2d',
+                    help='Type of visualization')
 parser.add_argument('--threshold', type=float, default=90,
                     help='Percentage of occlusion and truncation at which to cull bounding boxes.')
 parser.add_argument('--xkcd', action='store_true',
                     help='Yes.')
+parser.add_argument('--save',
+                    help='Saves the visualized image to the given filename.')
 
 args = parser.parse_args()
 
@@ -41,6 +46,46 @@ class_id_to_str = {
     32: 'motorcyclist',
     33: 'bicyclist'
 }
+
+colors = [
+    (  0,  0,  0),
+    (  0,  0,  0),
+    (  0,  0,  0),
+    (  0,  0,  0),
+    (  0,  0,  0),
+    (111, 74,  0),
+    ( 81,  0, 81),
+    (128, 64,128),
+    (244, 35,232),
+    (250,170,160),
+    (230,150,140),
+    ( 70, 70, 70),
+    (102,102,156),
+    (190,153,153),
+    (180,165,180),
+    (150,100,100),
+    (150,120, 90),
+    (153,153,153),
+    (153,153,153),
+    (250,170, 30),
+    (220,220,  0),
+    (107,142, 35),
+    (152,251,152),
+    ( 70,130,180),
+    (220, 20, 60),
+    (255,  0,  0),
+    (  0,  0,142),
+    (  0,  0, 70),
+    (  0, 60,100),
+    (  0,  0, 90),
+    (  0,  0,110),
+    (  0, 80,100),
+    (  0,  0,230),
+    (119, 11, 32)
+]
+
+colormap = matplotlib.colors.ListedColormap(
+    [(c[0] / 255.0, c[1] / 255.0, c[2] / 255.0) for c in colors])
 
 # Functions ---
 
@@ -141,7 +186,6 @@ img_path = os.path.join(root, 'img', 'rgb', '{}.png'.format(args.index))
 meta_path = os.path.join(root, 'meta')
 
 metadata = read_metadata(meta_path, args.index)[args.index]
-bbox_data = metadata['instance']['bbox{}'.format(args.type)]
 
 img = mpimg.imread(img_path)
 w = float(img.shape[1])
@@ -160,12 +204,29 @@ ax.imshow(img)
 
 # Add boxes
 if args.type == '2d':
+    bbox_data = metadata['instance']['bbox{}'.format(args.type)]
     draw_2d()
 elif args.type == '3d':
+    bbox_data = metadata['instance']['bbox{}'.format(args.type)]
     draw_3d()
+elif args.type == 'class':
+    class_path = os.path.join(root, 'img', args.type, '{}.png'.format(args.index))
+    class_img = mpimg.imread(class_path)
+    ax.imshow(class_img, cmap=colormap, alpha=0.66,
+              norm=matplotlib.colors.Normalize(vmin=0, vmax=33/255.0))
+elif args.type == 'instance':
+    instance_path = os.path.join(root, 'img', args.type, '{}.png'.format(args.index))
+    instance_img = mpimg.imread(instance_path)
+    ax.imshow(instance_img, alpha=0.5)
 
-# Display
 fig.set_size_inches(w / dpi, h / dpi, forward=True)
 plt.axis('off')
 plt.tight_layout()
-plt.show()
+
+# Save or Display
+if args.save:
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+    plt.savefig(args.save, pad_inches=0)
+else:
+    plt.show()
+

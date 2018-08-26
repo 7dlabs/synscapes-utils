@@ -46,6 +46,15 @@ def sort_by_scene_metadata(path, indices, key):
     return sorted(indices, key=lambda index: metadata[index]['scene'][key])
 
 
+def filter_by_scene_metadata(path, indices, key, value_min, value_max):
+    '''
+    Filters a set of indices by metadata value range
+    '''
+    metadata = read_metadata(path, indices)
+    return sorted([x for x in indices if metadata[x]['scene'][key] >= value_min and \
+                   metadata[x]['scene'][key] <= value_max])
+
+
 def metadata_values(path, indices, key):
     '''
     Extracts the metadata values for the specified indices

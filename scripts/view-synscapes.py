@@ -61,8 +61,13 @@ parser.add_argument('--display-num', '-d', type=int,
                     help='Maximum number of images to display')
 parser.add_argument('--sort', '-s', choices=scene_metadata,
                     help='Sort by the specified metadata key.')
+parser.add_argument('--restrict', '-r',
+                    help='Restricts the choice of image to one or more ')
 parser.add_argument('--plot', '-p', action='store_true',
                     help='Plots the values used to sort (requires --sort).')
+
+# DEBUG
+parser.add_argument('--meta-dir')
 
 args = parser.parse_args()
 
@@ -77,6 +82,9 @@ if not os.path.exists(root):
 
 img_dir, meta_dir = [os.path.join(root, x) for x in ['img', 'meta']]
 
+if args.meta_dir:
+    meta_dir = args.meta_dir
+
 # Ensure integrity
 for d in [img_dir, meta_dir]:
     if not os.path.exists(d):
@@ -89,6 +97,13 @@ indices = sorted([int(f.split('.')[0]) for f in os.listdir(meta_dir)])
 # Restrict number to analyze
 if args.analyze_num:
     indices = indices[::helpers.stride(len(indices), args.analyze_num)]
+
+# Restrict by metadata values
+if args.restrict:
+    for pair in args.restrict.split(','):
+        name, value_range = pair.split('=')
+        value_min, value_max = [float(x) for x in value_range.split('-')]
+        indices = helpers.filter_by_scene_metadata(meta_dir, indices, name, value_min, value_max)
 
 # Sort
 if args.sort:
