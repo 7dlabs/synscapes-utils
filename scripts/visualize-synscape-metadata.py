@@ -213,7 +213,7 @@ elif args.type == 'class':
     class_path = os.path.join(root, 'img', args.type, '{}.png'.format(args.index))
     class_img = mpimg.imread(class_path)
     ax.imshow(class_img, cmap=colormap, alpha=0.66,
-              norm=matplotlib.colors.Normalize(vmin=0, vmax=33/255.0))
+              norm=matplotlib.colors.Normalize(vmin=0, vmax=33/255.0), interpolation="none")
 elif args.type == 'instance':
     instance_path = os.path.join(root, 'img', args.type, '{}.png'.format(args.index))
     instance_img = mpimg.imread(instance_path)
